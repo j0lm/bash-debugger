@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include "tui.h"
 
 char *get_script(int argc, char *argv[]);
 
@@ -9,10 +10,22 @@ int main(int argc, char *argv[]) {
     // incorrect usage output
     if (argc <  2) {
         printf("Usage: %s <script_path [script_args...]\n", argv[0]);
+	return 1;
     }
     char *script_string = get_script(argc, argv);
     printf("Script to run: %s\n", script_string);
-    free(script_string)
+
+    int screen_height, screen_width;
+
+    init_ncurses();
+    init_panes(&screen_height, &screen_width);
+    refresh_ui(screen_height, screen_width);
+    test_write();
+    refresh_ui(screen_height, screen_width);
+
+    getch();
+    cleanup_ncurses();
+    free(script_string);
     return 0;
 }
 
