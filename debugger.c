@@ -40,11 +40,11 @@ void cleanup_ncurses() {
     endwin();
 }
 
-void read_pipe_and_display(int pipe_fd) {
+void read_pipe_and_display(int pipe_fd[2]) {
     char buffer[BUFFER_SIZE];
     ssize_t bytes_read;
 
-    while ((bytes_read = read(pipe_fd, buffer, sizeof(buffer) -1)) > 0) {
+    while ((bytes_read = read(pipe_fd[0], buffer, sizeof(buffer) -1)) > 0) {
         buffer[bytes_read] = '\0';
         printw("%s", buffer);
         refresh();
