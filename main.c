@@ -1,106 +1,45 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <ncurses.h>
 #include <string.h>
 
-#define BUFFER_SIZE 1024
-#define MAX_CMD_LEN 256
+char *get_script(int argc, char *argv[]);
 
-void setup_ncurses();
-void cleanup_ncurses();
-void display_output(int fd);
-void run_child_process(int pipe_fd[2], char *command);
-void run_parent_process(int pipe_fd[2]);
-void get_user_command(char *cmd_buffer);
-
-int main() {
-    char command[MAX_CMD_LEN];
-
-    setup_ncurses();
-
-    while(1) {
-        get_user_command(command);
-        
-        if (strcmp(command, "exit") == 0) {
-            break;
-        }
-        
-        int pipe_fd[2];
-        if (pipe(pipe_fd) == -1) {
-            perror("pipe failed");
-            return 1;
-        }
-
-        pid_t pid = fork();
-        if (pid == -1) {
-            perror("fork failed");
-            return 1;
-        }
-        
-        if (pid == 0) {
-            run_child_process(pipe_fd, command);
-        } else {
-            close(pipe_fd[1]);
-            display_output(pipe_fd[0]);
-            close(pipe_fd[0]);
-        }
+int main(int argc, char *argv[]) {
+    // incorrect usage output
+    if (argc <  2) {
+        printf("Usage: %s <script_path [script_args...]\n", argv[0]);
     }
-    cleanup_ncurses();
+    char *script_string = get_script(argc, argv);
+    printf("Script to run: %s\n", script_string);
+    free(script_string)
     return 0;
 }
 
-void setup_ncurses() {
-    initscr();              
-    cbreak();               
-    noecho();               
-    scrollok(stdscr, TRUE); 
-}
-
-void cleanup_ncurses() {
-    mvprintw(LINES -1, 0, "Press any key to exit...");
-    refresh();
-    getch();    
-    endwin();   
-}
-
-void display_output(int fd) {
-    char buffer[BUFFER_SIZE];
-    ssize_t bytes_read;
-
-    while ((bytes_read = read(fd, buffer, sizeof(buffer) - 1)) > 0) {
-        buffer[bytes_read] = '\0'; 
-        printw("%s", buffer);      
-        refresh();                 
+char *get_script(int argc, char *argv[]) {
+    // calculate length
+    int total_length = 0;
+    for (int i = 1; i < argc; i++) {
+        total_length += strlen(argv[i]) + 3; // space + 2 quotes
     }
-}
-
-void run_child_process(int pipe_fd[2], char *command) {
-    close(pipe_fd[0]);  
-
-    if (dup2(pipe_fd[1], STDOUT_FILENO) == -1) {
-        perror("dup2 (stdout) failed");
-        exit(1);
+    
+    // allocate memory
+    char *command = malloc(total_length);
+    if (!command) {
+        perror("malloc failed");
+        return NULL;
     }
 
-    if (dup2(pipe_fd[1], STDERR_FILENO) == -1) {  
-        perror("dup2 (stderr) failed");
-        exit(1);
-    }
+    // initialize empty string
+    command[0] = '\0';
+    
+    // combine arguments
+    snprintf(command, total_length + 1, "\"%s\"", argv[1]);
+    for (int i = 2; i < argc; i++) {
+        strcat(command, " \"");
+        strcat(command, argv[i]);
+        strcat(command, "\"");
+    } 
 
-    close(pipe_fd[1]);  
-
-    execlp("/bin/sh", "sh", "-c", command, NULL);  
-    perror("execlp failed");
-    exit(1);
+    return command;
 }
-
-void get_user_command(char *cmd_buffer) {
-    mvprintw(LINES - 1, 0, "Enter command: ");
-    echo();
-    getnstr(cmd_buffer, MAX_CMD_LEN -1);
-    noecho();
-    move(LINES -1, 0);
-    clrtoeol();
-}
-
