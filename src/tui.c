@@ -45,16 +45,9 @@ void cleanup_ncurses() {
     endwin();
 }
 
-void refresh_ui(int screen_height, int screen_width) {
+void refresh_ui() {
     clear();
     refresh();
-
-    int script_h = (2 * screen_height) / 3;
-    int script_w = (2 * screen_width) / 3;
-    int cmd_h = screen_height - script_h;
-    int cmd_w = script_w / 2;
-    int vars_h = script_h / 2;
-    int vars_w = screen_width - script_w;
 
     box(script_win, 0, 0);
     box(cmd_win, 0, 0);
@@ -70,15 +63,6 @@ void refresh_ui(int screen_height, int screen_width) {
     wrefresh(watch_win);
     wrefresh(stack_win);
     
-}
-
-void color_bkg() {
-    wbkgd(output_win, COLOR_PAIR(1));
-    wbkgd(cmd_win, COLOR_PAIR(2));
-    wbkgd(script_win, COLOR_PAIR(3));
-    wbkgd(vars_win, COLOR_PAIR(4));
-    wbkgd(watch_win, COLOR_PAIR(5));
-    wbkgd(stack_win, COLOR_PAIR(6));
 }
 
 void test_write() {

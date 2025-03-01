@@ -8,8 +8,7 @@ extern WINDOW *script_win, *cmd_win, *output_win, *vars_win, *watch_win, *stack_
 void init_ncurses();
 void init_panes(int *screen_height, int *screen_width);
 void cleanup_ncurses();
-void refresh_ui(int screen_height, int screen_width);
+void refresh_ui();
 void test_write();
-void color_bkg();
 
 #endif
