@@ -1,97 +1,89 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <ncurses.h>
-#include <sys/wait.h>
-#include <string.h>
 
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 1024
 
 void setup_ncurses();
-void cleanup ncurses();
-void read_pipe_and_display(int read_fd)
-void execute_command
+void cleanup_ncurses();
+void read_pipe_and_display(int fd);
+void run_child_process(int pipe_fd[2]);
+void run_parent_process(int pipe_fd[2]);
 
-pid_t execute_command(const char *cmd, int pipe_fd[2]) {
-    printf("DEBUG: forking process...\n");
+int main() {
+    int pipe_fd[2];
+
+    if (pipe(pipe_fd) == -1) {
+        perror("pipe failed");
+        return 1;
+    }
+
     pid_t pid = fork();
     if (pid == -1) {
-	perror("fork failed");
+        perror("fork failed");
+        return 1;
     }
-    
-    if (pid == 0) {  // ]child process
-	printf("Child process runnning with PID: %d\n", getpid());
-	fflush(stdout);
-	sleep(1);
-        close(pipe_fd[0]);
-	printf("DEBUG: About to run dup2\n");
-	fflush(stdout);
-	if (dup2(pipe_fd[1], STDOUT_FILENO) == -1) {
-	    perror("dup2 failed");
-	    exit(1);
-	}
-	dup2(pipe_fd[1], STDERR_FILENO);
-	close(pipe_fd[1]);
-	printf("Executing: %s\n", cmd);
-	fflush(stdout);
 
-	execlp("/bin/sh", "sh", "-c", cmd, NULL);
-	perror("error executing script");
-	exit(1);
-    } 
-    
-    printf("DEBUG: pid: %d\n", pid);
-    fflush(stdout);
-    return pid;
+    if (pid == 0) {  
+        run_child_process(pipe_fd);
+    } else {  
+        run_parent_process(pipe_fd);
+    }
+
+    return 0;
 }
 
-void init_ncurses() {
-    initscr();
-    cbreak();
-    noecho();
-    scrollok(stdscr, TRUE);
-    nodelay(stdscr, TRUE);
+void setup_ncurses() {
+    initscr();              
+    cbreak();               
+    noecho();               
+    scrollok(stdscr, TRUE); 
 }
 
 void cleanup_ncurses() {
-    printw("\nPress any key to exit...");
-    getch();
-    endwin();
+    getch();    
+    endwin();   
 }
 
-void read_pipe_and_display(int read_fd) {
+void read_pipe_and_display(int fd) {
     char buffer[BUFFER_SIZE];
     ssize_t bytes_read;
 
-    while ((bytes_read = read(read_fd, buffer, sizeof(buffer) -1)) > 0) {
-        buffer[bytes_read] = '\0';
-        printw("%s", buffer);
-        refresh();
-
-	if (getch() == 'q') {
-            return;
-        }
-	napms(10);
+    while ((bytes_read = read(fd, buffer, sizeof(buffer) - 1)) > 0) {
+        buffer[bytes_read] = '\0'; 
+        printw("%s", buffer);      
+        refresh();                 
     }
 }
 
-int main () {
-    int pipe_fd[2];
-    if(pipe(pipe_fd) == -1) {
-        perror("error executing pip()");
-	exit(1);
+void run_child_process(int pipe_fd[2]) {
+    close(pipe_fd[0]);  
+
+    if (dup2(pipe_fd[1], STDOUT_FILENO) == -1) {
+        perror("dup2 (stdout) failed");
+        exit(1);
     }
 
-    pid_t child_pid = execute_command("ls -l", pipe_fd);
+    if (dup2(pipe_fd[1], STDERR_FILENO) == -1) {  
+        perror("dup2 (stderr) failed");
+        exit(1);
+    }
 
-    close(pipe_fd[1]);
+    close(pipe_fd[1]);  
 
-    init_ncurses();
-    read_pipe_and_display(pipe_fd[0]);
-    close(pipe_fd[0]);
-    waitpid(child_pid, NULL, 0);
+    execlp("ls", "ls", "-l", NULL);  
+    perror("execlp failed");
+    exit(1);
+}
 
+void run_parent_process(int pipe_fd[2]) {
+    close(pipe_fd[1]);  
+
+    setup_ncurses();
+    read_pipe_and_display(pipe_fd[0]);  
     cleanup_ncurses();
-    return 0;
+
+    close(pipe_fd[0]);  
 }
+
