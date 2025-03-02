@@ -5,10 +5,28 @@
 
 extern WINDOW *script_win, *cmd_win, *output_win, *vars_win, *watch_win, *stack_win;
 
+typedef enum {
+    FOCUS_SCRIPT,
+    FOCUS_INPUT,
+    FOCUS_OUTPUT
+} FocusPane;
+
+typedef struct {
+    WINDOW *script_win;
+    WINDOW *cmd_win;
+    WINDOW *output_win;
+    WINDOW *vars_win;
+    WINDOW *watch_win;
+    WINDOW *stack_win;
+    FocusPane current_focus;
+} TuiState;
+
 void init_ncurses();
-void init_panes(int *screen_height, int *screen_width);
-void cleanup_ncurses();
-void refresh_ui();
-void test_write();
+void init_panes(TuiState *state, int *screen_height, int *screen_width);
+void cleanup_ncurses(TuiState *state);
+void refresh_ui(TuiState *state);
+void test_write(TuiState *state);
+void highlight_focused_pane(TuiState *state);
+void switch_focus(TuiState *state);
 
 #endif

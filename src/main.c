@@ -16,15 +16,25 @@ int main(int argc, char *argv[]) {
     printf("Script to run: %s\n", script_string);
 
     int screen_height, screen_width;
+    TuiState state;
 
+    // init
     init_ncurses();
-    init_panes(&screen_height, &screen_width);
-    refresh_ui(screen_height, screen_width);
-    test_write();
-    refresh_ui(screen_height, screen_width);
+    init_panes(&state, &screen_height, &screen_width);
+    refresh_ui(&state);
+    
+    // input loop
+    int ch;
+    while((ch = getch()) != 'q') {
+       if (ch == '\t') {
+           switch_focus(&state);
+       } 
+    
+       refresh_ui(&state);
+    }
 
     getch();
-    cleanup_ncurses();
+    cleanup_ncurses(&state);
     free(script_string);
     return 0;
 }
