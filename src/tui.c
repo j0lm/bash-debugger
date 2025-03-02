@@ -50,9 +50,6 @@ void refresh_ui(TuiState *state) {
     clear();
     refresh();
 
-    box(state->script_win, 0, 0);
-    box(state->cmd_win, 0, 0);
-    box(state->output_win, 0, 0);
     box(state->vars_win, 0, 0);
     box(state->watch_win, 0, 0);
     box(state->stack_win, 0, 0);
@@ -78,28 +75,18 @@ void test_write(TuiState *state) {
 }
 
 void highlight_focused_pane(TuiState *state) {
-    int  highlight_attr = A_BOLD | A_REVERSE;
+    WINDOW *focusable_window[] = {state->script_win, state->cmd_win, state->output_win};    
+    FocusPane focus_statuses[] = {FOCUS_SCRIPT, FOCUS_INPUT, FOCUS_OUTPUT};
+    int  highlight_attr = A_BOLD| A_REVERSE;
 
-    if (state->current_focus == FOCUS_SCRIPT) {
-        wattron(state->script_win, highlight_attr);
-	box(state->script_win, 0, 0);
-	wattroff(state->script_win, highlight_attr);	
-    } else {
-        box(state->script_win, 0, 0);
-    }
-    if (state->current_focus == FOCUS_INPUT) {
-        wattron(state->cmd_win, highlight_attr);
-	box(state->cmd_win, 0, 0);
-	wattroff(state->cmd_win, highlight_attr);
-    } else {
-        box(state->cmd_win, 0, 0);
-    }
-    if (state->current_focus == FOCUS_OUTPUT) {
-        wattron(state->output_win, highlight_attr);
-	box(state->output_win, 0, 0);
-	wattroff(state->output_win, highlight_attr);
-    } else {
-        box(state->output_win, 0, 0);
+    for (int i = 0; i < 3; i++) {
+        if (state->current_focus == focus_statuses[i]) {
+            wattron(focusable_window[i], highlight_attr);
+	    box(focusable_window[i], 0, 0);
+            wattroff(focusable_window[i], highlight_attr);
+	} else {
+            box(focusable_window[i], 0, 0);
+	}
     }
 }
 
