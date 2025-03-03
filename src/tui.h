@@ -19,6 +19,9 @@ typedef struct {
     WINDOW *watch_win;
     WINDOW *stack_win;
     FocusPane current_focus;
+    char **script_win_lines;
+    int script_win_line_count;
+    int script_win_current_line;
 } TuiState;
 
 void init_ncurses();
