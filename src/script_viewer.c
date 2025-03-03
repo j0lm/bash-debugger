@@ -46,17 +46,18 @@ void display_script (TuiState *state) {
 }
 
 void scroll_script(TuiState *state, int direction) {
-    if (direction == -1 && state->script_win_current_line > 0) {
+    if (direction == KEY_UP && state->script_win_current_line > 0) {
         state->script_win_current_line--;
-    } else if (direction == 1 && state->script_win_current_line < state->script_win_line_count - 1) {
+    } else if (direction == KEY_DOWN && state->script_win_current_line < state->script_win_line_count - 1) {
         state->script_win_current_line++;
     }
     display_script(state);
 }
 
-free_script_viewer(state) {
+void free_script_viewer(state) {
     for (int i = 0; i < state->script_win_line_count; i++) {
         free(state->script_win_lines[i]);
     }
     free(state->script_win_lines);
 }
+

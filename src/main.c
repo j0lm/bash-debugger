@@ -7,6 +7,7 @@
 char *get_script(int argc, char *argv[]);
 
 int main(int argc, char *argv[]) {
+    const char *filename = strdup(argv[1]);
     // incorrect usage output
     if (argc <  2) {
         printf("Usage: %s <script_path [script_args...]\n", argv[0]);
@@ -22,12 +23,18 @@ int main(int argc, char *argv[]) {
     init_ncurses();
     init_panes(&state, &screen_height, &screen_width);
     refresh_ui(&state);
+    init_script_viewer(&state);
+    if (load_script_file(&state, filename) == -1) {
+        return -1;
+    }
     
     // input loop
     int ch;
     while((ch = getch()) != 'q') {
        if (ch == '\t') {
            switch_focus(&state);
+       } if (ch == KEY_UP || ch == KEY_DOWN) {
+           scroll_script(state, ch); 
        } 
     
        refresh_ui(&state);
