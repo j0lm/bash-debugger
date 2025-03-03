@@ -2,7 +2,7 @@
 
 void init_script_viewer(TuiState *state) {
     state->script_win_lines = malloc(MAX_LINES * sizeof(char *));
-    if (state->script_win_lines) {
+    if (!state->script_win_lines) {
         perror("failed to allocate memory for script viewer");
         exit(1);
     }
@@ -10,7 +10,7 @@ void init_script_viewer(TuiState *state) {
     state->script_win_current_line = 0;
 }
 
-int load_script_file(TuiState *state, const char *filename) {
+int load_script_file(TuiState *state, char *filename) {
     FILE *file = fopen(filename, "r");
     if (!file) {
         perror("error opening file");

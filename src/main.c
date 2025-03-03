@@ -9,7 +9,7 @@ extern char* strdup(const char*);
 char *get_script(int argc, char *argv[]);
 
 int main(int argc, char *argv[]) {
-    const char *filename = strdup(argv[1]);
+    char *filename = strdup(argv[1]);
     // incorrect usage output
     if (argc <  2) {
         printf("Usage: %s <script_path [script_args...]\n", argv[0]);
@@ -43,8 +43,10 @@ int main(int argc, char *argv[]) {
     }
 
     getch();
+    free_script_viewer(&state);
     cleanup_ncurses(&state);
     free(script_string);
+    free(filename);
     return 0;
 }
 

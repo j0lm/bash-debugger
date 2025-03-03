@@ -10,8 +10,9 @@
 #define MAX_LINES 1000   // Adjust based on needs
 #define MAX_LINE_LENGTH 256  // Maximum length per line
 
+extern char* strdup(const char*);
 void init_script_viewer(TuiState *state);
-int load_script_file(TuiState *state, const char *filename);
+int load_script_file(TuiState *state, char *filename);
 void display_script(TuiState *state);
 void scroll_script(TuiState *state, int direction);
 void free_script_viewer(TuiState *state);
