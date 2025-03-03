@@ -14,6 +14,6 @@ void init_script_viewer(TuiState *state);
 int load_script_file(TuiState *state, const char *filename);
 void display_script(TuiState *state);
 void scroll_script(TuiState *state, int direction);
-void free_script_viewer(state);
+void free_script_viewer(TuiState *state);
 
 #endif // SCRIPT_VIEWER_H

@@ -3,7 +3,9 @@
 #include <unistd.h>
 #include <string.h>
 #include "tui.h"
+#include "script_viewer.h"
 
+extern char* strdup(const char*);
 char *get_script(int argc, char *argv[]);
 
 int main(int argc, char *argv[]) {
@@ -34,7 +36,7 @@ int main(int argc, char *argv[]) {
        if (ch == '\t') {
            switch_focus(&state);
        } if (ch == KEY_UP || ch == KEY_DOWN) {
-           scroll_script(state, ch); 
+           scroll_script(&state, ch); 
        } 
     
        refresh_ui(&state);

@@ -8,7 +8,7 @@ SRC_DIR = src
 BUILD_DIR = build
 
 # object files
-OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/tui.o
+OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/tui.o $(BUILD_DIR)/script_viewer.o
 
 # target executable
 TARGET = debugger

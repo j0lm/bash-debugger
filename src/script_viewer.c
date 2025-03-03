@@ -11,7 +11,7 @@ void init_script_viewer(TuiState *state) {
 }
 
 int load_script_file(TuiState *state, const char *filename) {
-    FILE *file = fopen(filename);
+    FILE *file = fopen(filename, "r");
     if (!file) {
         perror("error opening file");
 	return -1;
@@ -54,7 +54,7 @@ void scroll_script(TuiState *state, int direction) {
     display_script(state);
 }
 
-void free_script_viewer(state) {
+void free_script_viewer(TuiState *state) {
     for (int i = 0; i < state->script_win_line_count; i++) {
         free(state->script_win_lines[i]);
     }
